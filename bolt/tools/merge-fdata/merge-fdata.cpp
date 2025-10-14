@@ -120,14 +120,14 @@ void mergeProfileHeaders(BinaryProfileHeader &MergedHeader,
   if (!MergedHeader.Id.empty() && (MergedHeader.Id != Header.Id))
     errs() << "WARNING: build-ids in merged profiles do not match\n";
 
-  // Cannot merge samples profile with LBR profile.
+  // Cannot merge samples profile with BRSTACK profile.
   if (!MergedHeader.Flags)
     MergedHeader.Flags = Header.Flags;
 
   constexpr auto Mask = llvm::bolt::BinaryFunction::PF_BRANCH |
                         llvm::bolt::BinaryFunction::PF_BASIC;
   if ((MergedHeader.Flags & Mask) != (Header.Flags & Mask)) {
-    errs() << "ERROR: cannot merge LBR profile with non-LBR profile\n";
+    errs() << "ERROR: cannot merge BRSTACK profile with non-BRSTACK profile\n";
     exit(1);
   }
   MergedHeader.Flags = MergedHeader.Flags | Header.Flags;
@@ -319,7 +319,7 @@ void mergeLegacyProfiles(const SmallVectorImpl<std::string> &Filenames) {
       auto [Signature, ExecCount] = Line.rsplit(' ');
       if (ExecCount.getAsInteger(10, Count.Exec))
         report_error(Filename, "Malformed / corrupted execution count");
-      // Only LBR profile has misprediction field
+      // Only BRSTACK profile has misprediction field
       if (!NoLBRCollection.value_or(false)) {
         auto [SignatureLBR, MispredCount] = Signature.rsplit(' ');
         Signature = SignatureLBR;
