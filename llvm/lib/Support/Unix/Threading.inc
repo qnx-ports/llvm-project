@@ -55,6 +55,11 @@
 #include <unistd.h>      // For syscall()
 #endif
 
+
+#if defined(__QNX__)
+#include <sys/neutrino.h>  // For _NTO_THREAD_NAME_MAX
+#endif
+
 namespace llvm {
 pthread_t
 llvm_execute_on_thread_impl(void *(*ThreadFunc)(void *), void *Arg,
@@ -150,7 +155,9 @@ static constexpr uint32_t get_max_thread_name_length_impl() {
 #elif defined(__FreeBSD__) || defined(__FreeBSD_kernel__)
   return 16;
 #elif defined(__OpenBSD__)
-  return 32;
+  return 24;
+#elif defined(__QNX__)
+  return _NTO_THREAD_NAME_MAX;
 #else
   return 0;
 #endif

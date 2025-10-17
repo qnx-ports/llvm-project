@@ -239,7 +239,8 @@ public:
     LiteOS,
     Serenity,
     Vulkan, // Vulkan SPIR-V
-    LastOSType = Vulkan
+    QNX,    // Blackberry QNX 
+    LastOSType = QNX
   };
   enum EnvironmentType {
     UnknownEnvironment,
@@ -807,6 +808,8 @@ public:
   }
 
   bool isVulkanOS() const { return getOS() == Triple::Vulkan; }
+
+  bool isOSQNX() const { return getOS() == Triple::QNX; }
 
   bool isShaderStageEnvironment() const {
     EnvironmentType Env = getEnvironment();
