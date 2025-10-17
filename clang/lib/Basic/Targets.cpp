@@ -167,6 +167,9 @@ std::unique_ptr<TargetInfo> AllocateTarget(const llvm::Triple &Triple,
     case llvm::Triple::Managarm:
       return std::make_unique<ManagarmTargetInfo<AArch64leTargetInfo>>(Triple,
                                                                        Opts);
+    case llvm::Triple::QNX:
+      return std::make_unique<QNXTargetInfo<AArch64leTargetInfo>>(Triple,
+                                                                    Opts);
     case llvm::Triple::NetBSD:
       return std::make_unique<NetBSDTargetInfo<AArch64leTargetInfo>>(Triple,
                                                                      Opts);
@@ -663,6 +666,8 @@ std::unique_ptr<TargetInfo> AllocateTarget(const llvm::Triple &Triple,
     case llvm::Triple::Managarm:
       return std::make_unique<ManagarmTargetInfo<X86_64TargetInfo>>(Triple,
                                                                     Opts);
+    case llvm::Triple::QNX:
+      return std::make_unique<QNXTargetInfo<X86_64TargetInfo>>(Triple, Opts);
     default:
       return std::make_unique<X86_64TargetInfo>(Triple, Opts);
     }
