@@ -339,8 +339,8 @@ StringRef Triple::getOSTypeName(OSType Kind) {
   case LiteOS: return "liteos";
   case XROS: return "xros";
   case Vulkan: return "vulkan";
-  case CheriotRTOS:
-    return "cheriotrtos";
+  case CheriotRTOS: return "cheriotrtos";
+  case QNX: return "qnx";
   }
 
   llvm_unreachable("Invalid OSType");
@@ -414,6 +414,8 @@ StringRef Triple::getEnvironmentTypeName(EnvironmentType Kind) {
     return "llvm";
   case Mlibc:
     return "mlibc";
+  case QNX8:
+	return "qnx8";
   }
 
   llvm_unreachable("Invalid EnvironmentType!");
@@ -754,6 +756,8 @@ static Triple::OSType parseOS(StringRef OSName) {
       .StartsWith("serenity", Triple::Serenity)
       .StartsWith("vulkan", Triple::Vulkan)
       .StartsWith("cheriotrtos", Triple::CheriotRTOS)
+      .StartsWith("qnx", Triple::QNX)
+      .StartsWith("nto", Triple::QNX)
       .Default(Triple::UnknownOS);
 }
 
@@ -813,6 +817,7 @@ static Triple::EnvironmentType parseEnvironment(StringRef EnvironmentName) {
       .StartsWith("llvm", Triple::LLVM)
       .StartsWith("mlibc", Triple::Mlibc)
       .StartsWith("mtia", Triple::MTIA)
+      .StartsWith("qnx8", Triple::QNX8)
       .Default(Triple::UnknownEnvironment);
 }
 
