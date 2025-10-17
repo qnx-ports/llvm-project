@@ -23,16 +23,20 @@
 #if defined(__linux__) || defined(__FreeBSD__) || defined(__Fuchsia__) ||      \
     (defined(__sun__) && defined(__svr4__)) || defined(__NetBSD__) ||          \
     defined(_AIX) || defined(__wasm__) || defined(__HAIKU__) ||                \
-    defined(COMPILER_RT_PROFILE_BAREMETAL)
+    defined(__QNX__) || defined(COMPILER_RT_PROFILE_BAREMETAL)
 
-#if !defined(_AIX) && !defined(__wasm__) &&                                    \
+#if !defined(_AIX) && !defined(__wasm__) && !defined(__QNX__) &&               \
     !defined(COMPILER_RT_PROFILE_BAREMETAL)
 // Includes for non-baremetal ELF targets, used to output build IDs.
 #include <elf.h>
 #include <link.h>
+#elif defined(__QNX__)
+#include <sys/elf.h>
+#include <sys/link.h>
+#endif
+
 #include <stdlib.h>
 #include <string.h>
-#endif
 
 #include "InstrProfiling.h"
 #include "InstrProfilingInternal.h"
