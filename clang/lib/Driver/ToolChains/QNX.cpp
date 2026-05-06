@@ -29,9 +29,10 @@ void tools::QNX::Linker::ConstructJob(Compilation &C, const JobAction &JA,
   const Driver &D = ToolChain.getDriver();
   const bool Shared = Args.hasArg(options::OPT_shared);
   const bool Static = Args.hasArg(options::OPT_static);
+  const bool Relocatable = Args.hasArg(options::OPT_r);
   ArgStringList CmdArgs;
   bool isLLD = false;
-  const bool IsPIE = !Shared && (Args.hasArg(options::OPT_pie) || ToolChain.isPIEDefault(Args));
+  const bool IsPIE = !Shared && !Relocatable && (Args.hasArg(options::OPT_pie) || ToolChain.isPIEDefault(Args));
 
   ToolChain.GetLinkerPath(&isLLD);
   // Silence warning for "clang -g foo.o -o foo"
@@ -69,7 +70,7 @@ void tools::QNX::Linker::ConstructJob(Compilation &C, const JobAction &JA,
   } else {
     if (Shared) {
       CmdArgs.push_back("-shared");
-    } else if (!Args.hasArg(options::OPT_r)) {
+    } else if (!Relocatable) {
       CmdArgs.push_back("-dynamic-linker");
       CmdArgs.push_back("/usr/lib/ldqnx-64.so.2");
     }
