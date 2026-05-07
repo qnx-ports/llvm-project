@@ -58,6 +58,11 @@
 #include <sys/mman.h>
 #endif
 
+#ifdef __QNX__
+#define madvise posix_madvise
+#define MADV_WILLNEED POSIX_MADV_WILLNEED
+#endif
+
 using namespace llvm;
 using namespace llvm::MachO;
 using namespace llvm::object;
