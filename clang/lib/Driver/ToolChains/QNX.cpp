@@ -61,10 +61,6 @@ void tools::QNX::Linker::ConstructJob(Compilation &C, const JobAction &JA,
   CmdArgs.push_back("-znow");
   CmdArgs.push_back("--eh-frame-hdr");
 
-  // enforce 8mb stack size, the default size for QNX is too small at 256/512K
-  CmdArgs.push_back("-z");
-  CmdArgs.push_back("stack-size=8388608");
-
   if (Static) {
     CmdArgs.push_back("-Bstatic");
   } else {
