@@ -117,6 +117,10 @@ typedef uint_t uint;
 #define STATVFS_F_FLAG(vfs) (vfs).f_flags
 #endif
 
+#if defined(__QNX__)
+#include <process.h>   // _cmdname()
+#endif
+
 using namespace llvm;
 
 namespace llvm {
@@ -255,17 +259,9 @@ std::string getMainExecutable(const char *argv0, void *MainAddr) {
     return exe_path;
 #elif defined(__QNX__)
   char exe_path[PATH_MAX] = {};
-  const char *aPath = "/proc/self/exefile";
-  if (!sys::fs::exists(aPath)) {
-    return "";
+  if (_cmdname(exe_path) == nullptr) {
+      return "";
   }
-
-  int fd = open(aPath, O_RDONLY);
-  if(fd == -1) {
-    return "";
-  }
-
-  read(fd, exe_path, sizeof(exe_path));
   if (char *real_path = realpath(exe_path, nullptr)) {
       std::string ret = std::string(real_path);
       free(real_path);
