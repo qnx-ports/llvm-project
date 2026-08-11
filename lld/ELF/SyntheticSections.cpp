@@ -4566,6 +4566,26 @@ size_t PackageMetadataNote::getSize() const {
          alignTo(ctx.arg.packageMetadata.size() + 1, 4);
 }
 
+QNXStackNote::QNXStackNote(Ctx &ctx)
+    : SyntheticSection(ctx, ".note.qnx.stack", SHT_NOTE, SHF_ALLOC, 4) {
+
+    stackSize = ctx.arg.zStackSize ? ctx.arg.zStackSize : 0;
+    stackAlloc = stackSize;
+    flags = (ctx.arg.zGnustack == GnuStackKind::Exec) ? 0 : 1;
+}
+
+void QNXStackNote::writeTo(uint8_t *buf) {
+    write32(ctx, buf + 0, 4);
+    write32(ctx, buf + 4, 12);
+    write32(ctx, buf + 8, 3);  // QNT_STACK (3)
+
+    memcpy(buf + 12, "QNX", 4);
+
+    write32(ctx, buf + 16, stackSize);
+    write32(ctx, buf + 20, stackAlloc);
+    write32(ctx, buf + 24, flags);
+}
+
 // Helper function, return the size of the ULEB128 for 'v', optionally writing
 // it to `*(buf + offset)` if `buf` is non-null.
 static size_t computeOrWriteULEB128(uint64_t v, uint8_t *buf, size_t offset) {
@@ -4928,6 +4948,11 @@ template <class ELFT> void elf::createSyntheticSections(Ctx &ctx) {
   if (ctx.arg.relocatable) {
     ctx.in.gnuStack = std::make_unique<GnuStackSection>(ctx);
     add(*ctx.in.gnuStack);
+  }
+
+  if (ctx.arg.dynamicLinker.contains("ldqnx") && (ctx.arg.zStackSize || (ctx.arg.zGnustack != GnuStackKind::None))){
+    ctx.in.qnxStack = std::make_unique<QNXStackNote>(ctx);
+    add(*ctx.in.qnxStack);
   }
 
   if (ctx.in.symTab)

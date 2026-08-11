@@ -601,6 +601,8 @@ struct InStruct {
   std::unique_ptr<StringTableSection> strTab;
   std::unique_ptr<SymbolTableBaseSection> symTab;
   std::unique_ptr<SymtabShndxSection> symTabShndx;
+  // QNX
+  std::unique_ptr<SyntheticSection> qnxStack;
 };
 
 struct Ctx : CommonLinkerContext {

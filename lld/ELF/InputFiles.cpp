@@ -1084,6 +1084,45 @@ static void readGnuProperty(Ctx &ctx, const InputSection &sec,
 }
 
 template <class ELFT>
+static bool isQnxStack(Ctx &ctx, const InputSection &sec) {
+  using Elf_Nhdr = typename ELFT::Nhdr;
+  using Elf_Note = typename ELFT::Note;
+
+  constexpr uint32_t QNX_NOTE_STACK = 3; // Target note type
+
+  ArrayRef<uint8_t> data = sec.content();
+  auto err = [&](const uint8_t *place) -> ELFSyncStream {
+    auto diag = Err(ctx);
+    diag << sec.file << ":(" << sec.name << "+0x"
+         << Twine::utohexstr(place - sec.content().data()) << "): ";
+    return diag;
+  };
+
+  while (!data.empty()) {
+    if (data.size() < sizeof(Elf_Nhdr)) {
+      return false;
+    }
+
+    auto *nhdr = reinterpret_cast<const Elf_Nhdr *>(data.data());
+    size_t noteSize = nhdr->getSize(sec.addralign);
+
+    if (data.size() < noteSize) {
+      err(data.data()) << "corrupt note section: note header claims size larger than section bounds";
+      return false;
+    }
+
+    Elf_Note note(*nhdr);
+    if (nhdr->n_type == QNX_NOTE_STACK && note.getName() == "QNX")
+      return true;
+
+    // Advance to the next note record safely using alignment rules
+    data = data.slice(noteSize);
+  }
+
+  return false;
+}
+
+template <class ELFT>
 InputSectionBase *ObjFile<ELFT>::getRelocTarget(uint32_t idx, uint32_t info) {
   if (info < this->sections.size()) {
     InputSectionBase *target = this->sections[info];
@@ -1177,6 +1216,12 @@ InputSectionBase *ObjFile<ELFT>::createInputSection(uint32_t idx,
     // against it.
     if (name == ".note.gnu.build-id")
       return &InputSection::discarded;
+
+    // We need to check both .note and .note.qnx.stack since qnx qcc/gcc default to just using
+    // .note so we need this extra check for backwards compatability
+    if ((name == ".note" || name == ".note.qnx.stack") && isQnxStack<ELFT>(ctx, InputSection(*this, sec, name))) {
+      return &InputSection::discarded;
+    }
   }
 
   // The linker merges EH (exception handling) frames and creates a
