@@ -1439,6 +1439,18 @@ private:
   SmallVector<const Symbol *, 0> symbols;
 };
 
+// .note.qnx.stack section.
+class QNXStackNote : public SyntheticSection {
+public:
+  QNXStackNote(Ctx &ctx);
+  void writeTo(uint8_t *buf) override;
+  size_t getSize() const override { return 28; }
+private:
+    uint32_t stackSize;
+    uint32_t stackAlloc;
+    uint32_t flags;
+};
+
 template <class ELFT> void createSyntheticSections(Ctx &);
 InputSection *createInterpSection(Ctx &);
 MergeInputSection *createCommentSection(Ctx &);

@@ -1553,7 +1553,9 @@ static void readConfigs(Ctx &ctx, opt::InputArgList &args) {
   if (args.hasArg(OPT_randomize_section_padding))
     ctx.arg.randomizeSectionPadding =
         args::getInteger(args, OPT_randomize_section_padding, 0);
-  ctx.arg.singleRoRx = !args.hasFlag(OPT_rosegment, OPT_no_rosegment, true);
+  // TODO: figure out a "correct" way to do this that is upstreamable
+  // QNX has a bug in its elfloader where you MUST have a singleRoRx
+  ctx.arg.singleRoRx = !args.hasFlag(OPT_rosegment, OPT_no_rosegment, ctx.arg.dynamicLinker.contains("ldqnx") ? false : true);
   ctx.arg.singleXoRx = !args.hasFlag(OPT_xosegment, OPT_no_xosegment, false);
   ctx.arg.soName = args.getLastArgValue(OPT_soname);
   ctx.arg.sortSection = getSortSection(ctx, args);
