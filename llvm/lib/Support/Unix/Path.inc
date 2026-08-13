@@ -259,7 +259,7 @@ std::string getMainExecutable(const char *argv0, void *MainAddr) {
     return exe_path;
 #elif defined(__QNX__)
   char exe_path[PATH_MAX] = {};
-  if (_cmdline(exe_path) == nullptr) {
+  if (_cmdname(exe_path) == nullptr) {
     return "";
   }
 
