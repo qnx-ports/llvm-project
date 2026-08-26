@@ -1483,8 +1483,12 @@ static void readConfigs(Ctx &ctx, opt::InputArgList &args) {
   ctx.arg.mipsGotSize = args::getInteger(args, OPT_mips_got_size, 0xfff0);
   ctx.arg.mergeArmExidx =
       args.hasFlag(OPT_merge_exidx_entries, OPT_no_merge_exidx_entries, true);
+  // TODO: figure out a "correct" way to do this that is upstreamable
+  // QNX memory manager keeps mmap files fd open for up to a second after they have been closed
+  // This results in the output file being un executable for up to a second which breaks
+  // configure scripts
   ctx.arg.mmapOutputFile =
-      args.hasFlag(OPT_mmap_output_file, OPT_no_mmap_output_file, false);
+      args.hasFlag(OPT_mmap_output_file, OPT_no_mmap_output_file,  ctx.arg.dynamicLinker.contains("ldqnx") ? true : false);
   ctx.arg.nmagic = args.hasFlag(OPT_nmagic, OPT_no_nmagic, false);
   ctx.arg.noinhibitExec = args.hasArg(OPT_noinhibit_exec);
   ctx.arg.nostdlib = args.hasArg(OPT_nostdlib);
